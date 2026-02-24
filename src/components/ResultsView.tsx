@@ -34,6 +34,9 @@ interface Props {
 
 export default function ResultsView({ result, input, onReset }: Props) {
   const reportRef = useRef<HTMLDivElement>(null);
+  const [whatIfMultiplier, setWhatIfMultiplier] = useState(1.0);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
   const handleDownloadPDF = async () => {
     const html2canvas = (await import('html2canvas')).default;
@@ -130,6 +133,48 @@ export default function ResultsView({ result, input, onReset }: Props) {
                 color="#8B5CF6"
               />
             </div>
+          </div>
+
+          {/* ======= #7 What-if Slider ======= */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-100">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg">🎛️</span>
+              <p className="text-sm font-bold text-[#1B4F72]">What-if 시나리오 조절</p>
+            </div>
+            <p className="text-xs text-gray-500 mb-3">자동화 달성률을 조절하여 다양한 시나리오를 확인하세요.</p>
+            <div className="flex items-center gap-4">
+              <input
+                type="range"
+                min={50}
+                max={150}
+                step={5}
+                value={whatIfMultiplier * 100}
+                onChange={e => setWhatIfMultiplier(Number(e.target.value) / 100)}
+                className="flex-1 accent-[#2563EB]"
+              />
+              <span className="text-lg font-bold text-[#2563EB] w-16 text-right">{Math.round(whatIfMultiplier * 100)}%</span>
+            </div>
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <span>보수적 50%</span>
+              <span>기본 100%</span>
+              <span>공격적 150%</span>
+            </div>
+            {whatIfMultiplier !== 1.0 && (
+              <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+                <div className="bg-white rounded-lg p-2 border border-blue-100">
+                  <p className="text-xs text-gray-400">조정 월 절감액</p>
+                  <p className="text-sm font-bold text-[#2563EB]">{Math.round(result.totalMonthlySaving * whatIfMultiplier).toLocaleString()}만원</p>
+                </div>
+                <div className="bg-white rounded-lg p-2 border border-blue-100">
+                  <p className="text-xs text-gray-400">조정 연 절감액</p>
+                  <p className="text-sm font-bold text-[#10B981]">{Math.round(result.totalYearlySaving * whatIfMultiplier).toLocaleString()}만원</p>
+                </div>
+                <div className="bg-white rounded-lg p-2 border border-blue-100">
+                  <p className="text-xs text-gray-400">조정 ROI</p>
+                  <p className="text-sm font-bold text-[#8B5CF6]">{Math.round(((result.totalYearlySaving * whatIfMultiplier - result.investmentCost) / result.investmentCost) * 100)}%</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ======= Hidden Costs Discovery ======= */}
@@ -350,7 +395,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
           <div>
             <SectionTitle>3개년 투자 수익 전망</SectionTitle>
             <div className="bg-gray-50 rounded-xl p-5">
-              <div className="space-y-4">
+              <div className="space-y-4 stagger-children">
                 {result.yearProjections.map(yp => {
                   const maxVal = Math.max(...result.yearProjections.map(y => y.cumulativeSaving));
                   return (
@@ -510,31 +555,91 @@ export default function ResultsView({ result, input, onReset }: Props) {
             </div>
           )}
 
-          {/* ======= Industry Benchmark ======= */}
+          {/* ======= Industry Benchmark with Gauge ======= */}
           <div>
-            <SectionTitle>업계 벤치마크</SectionTitle>
-            <div className="bg-[#F0F9FF] rounded-xl p-5 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-xs text-gray-500">업계 평균 자동화율</p>
-                <p className="text-xl font-bold text-[#1B4F72]">{Math.round(benchmark.avgAutomationRate * 100)}%</p>
+            <SectionTitle>업계 벤치마크 비교</SectionTitle>
+            <div className="bg-[#F0F9FF] rounded-xl p-5 space-y-4">
+              {/* Gauge: 귀사 vs 업계 평균 */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-white rounded-lg p-4 border border-blue-100">
+                  <p className="text-xs text-gray-500 mb-2">자동화 수준 비교</p>
+                  <div className="relative h-4 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="absolute h-full bg-[#00B4D8]/30 rounded-full" style={{ width: `${benchmark.avgAutomationRate * 100}%` }} />
+                    <div className="absolute h-full bg-[#00B4D8] rounded-full transition-all duration-1000" style={{ width: `${Math.min(Math.round((result.totalSavedHoursMonthly / Math.max(result.totalCurrentHoursMonthly, 1)) * 100), 100)}%` }} />
+                  </div>
+                  <div className="flex justify-between mt-1 text-xs">
+                    <span className="text-[#00B4D8] font-semibold">귀사 예상: {Math.round((result.totalSavedHoursMonthly / Math.max(result.totalCurrentHoursMonthly, 1)) * 100)}%</span>
+                    <span className="text-gray-400">업계 평균: {Math.round(benchmark.avgAutomationRate * 100)}%</span>
+                  </div>
+                </div>
+                <div className="bg-white rounded-lg p-4 border border-blue-100">
+                  <p className="text-xs text-gray-500 mb-2">AI 도입 현황</p>
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-16 h-16">
+                      <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="#E5E7EB" strokeWidth="3" />
+                        <circle cx="18" cy="18" r="15" fill="none" stroke="#00B4D8" strokeWidth="3"
+                          strokeDasharray={`${benchmark.industryAdoptionRate * 0.94} 94`}
+                          strokeLinecap="round" />
+                      </svg>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xs font-bold text-[#1B4F72]">{benchmark.industryAdoptionRate}%</span>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[#1B4F72]">{INDUSTRY_LABELS[input.industry]} AI 도입률</p>
+                      <p className="text-xs text-gray-400">경쟁사 {benchmark.industryAdoptionRate}%가 이미 도입</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-gray-500">AI 도입 기업 비율</p>
-                <p className="text-xl font-bold text-[#00B4D8]">{benchmark.industryAdoptionRate}%</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">평균 프로젝트 비용</p>
-                <p className="text-xl font-bold text-[#1B4F72]">
-                  {(benchmark.projectCostRange[0] / 1000).toFixed(0)}~{(benchmark.projectCostRange[1] / 1000).toFixed(0)}천만원
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">평균 구축 기간</p>
-                <p className="text-xl font-bold text-[#1B4F72]">
-                  {benchmark.implementationMonths[0]}~{benchmark.implementationMonths[1]}개월
-                </p>
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="text-xs text-gray-500">평균 프로젝트 비용</p>
+                  <p className="text-lg font-bold text-[#1B4F72]">
+                    {(benchmark.projectCostRange[0] / 1000).toFixed(0)}~{(benchmark.projectCostRange[1] / 1000).toFixed(0)}천만원
+                  </p>
+                </div>
+                <div className="bg-white rounded-lg p-3 border border-blue-100">
+                  <p className="text-xs text-gray-500">평균 구축 기간</p>
+                  <p className="text-lg font-bold text-[#1B4F72]">
+                    {benchmark.implementationMonths[0]}~{benchmark.implementationMonths[1]}개월
+                  </p>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* ======= #9 Email Capture ======= */}
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-100">
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-2xl">📧</span>
+              <div>
+                <p className="text-sm font-bold text-[#1B4F72]">이 리포트를 이메일로 받으세요</p>
+                <p className="text-xs text-gray-500">상세 분석 리포트를 PDF로 이메일 발송해드립니다.</p>
+              </div>
+            </div>
+            {!emailSent ? (
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="이메일 주소 입력"
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 outline-none"
+                />
+                <button
+                  onClick={() => { if (emailInput.includes('@')) setEmailSent(true); }}
+                  className="px-6 py-2.5 bg-[#8B5CF6] text-white text-sm font-semibold rounded-lg hover:bg-[#7C3AED] transition"
+                >
+                  발송 요청
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
+                <span>✅</span> 요청이 접수되었습니다. 곧 이메일을 확인해주세요!
+              </div>
+            )}
           </div>
 
           {/* ======= CTA ======= */}

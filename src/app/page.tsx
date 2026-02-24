@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { calculateROI } from '@/lib/roi-calculator';
 import type { SimulationInput, SimulationResult, TaskInput } from '@/lib/supabase';
 import {
@@ -120,7 +120,26 @@ export default function Home() {
       urgencyLevel: 'planning', freeText: '', painPoints: [], tasks: [],
       avgMonthlySalary: 350, errorRate: 5, complianceRisk: false,
     });
+    try { localStorage.removeItem('aidp_draft'); } catch {}
   };
+
+  // #6: Auto-save to localStorage
+  useEffect(() => {
+    if (input.industry) {
+      try { localStorage.setItem('aidp_draft', JSON.stringify({ step, input })); } catch {}
+    }
+  }, [step, input]);
+
+  // #6: Restore from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('aidp_draft');
+      if (saved) {
+        const { step: s, input: inp } = JSON.parse(saved);
+        if (inp?.industry && s < 4) { setInput(inp); setStep(s); }
+      }
+    } catch {}
+  }, []);
 
   const industryPains = PAIN_POINTS[input.industry] || [];
 
