@@ -4,6 +4,19 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import type { SimulationResult, SimulationInput } from '@/lib/supabase';
 import { INDUSTRY_LABELS, INDUSTRY_BENCHMARKS } from '@/lib/constants';
 
+// === Tooltip component (#11) ===
+function Tooltip({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <span className="relative group cursor-help inline-flex items-center">
+      {children}
+      <span className="invisible group-hover:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap z-50 shadow-lg">
+        {text}
+        <span className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 border-4 border-transparent border-t-gray-800" />
+      </span>
+    </span>
+  );
+}
+
 // === Count-up animation hook ===
 function useCountUp(end: number, duration = 1200) {
   const [value, setValue] = useState(0);
@@ -100,9 +113,20 @@ export default function ResultsView({ result, input, onReset }: Props) {
         </div>
 
         <div className="p-6 md:p-8 space-y-8">
+          {/* ======= #12 Celebration Banner ======= */}
+          {result.moderateROI >= 100 && (
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-4 text-white flex items-center gap-3 animate-scaleIn">
+              <span className="text-3xl">🎉</span>
+              <div>
+                <p className="font-bold text-lg">놀라운 ROI입니다!</p>
+                <p className="text-sm text-emerald-100">첫 해 투자수익률 {result.moderateROI}%로, 투자 대비 {(result.moderateROI / 100).toFixed(1)}배의 가치를 창출합니다.</p>
+              </div>
+            </div>
+          )}
+
           {/* ======= Executive Summary ======= */}
           <div>
-            <SectionTitle>핵심 요약 (Executive Summary)</SectionTitle>
+            <SectionTitle><Tooltip text="가장 중요한 4가지 핵심 지표입니다">핵심 요약 (Executive Summary)</Tooltip></SectionTitle>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
               <MetricCard
                 label="월간 절감 시간"
@@ -180,7 +204,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
           {/* ======= Hidden Costs Discovery ======= */}
           {result.hiddenCosts.length > 0 && (
             <div>
-              <SectionTitle color="#EF4444">발견된 숨은 비용</SectionTitle>
+              <SectionTitle color="#EF4444"><Tooltip text="인건비 외에 발생하는 간접 비용 (오류, 기회비용, 이직 등)">발견된 숨은 비용</Tooltip></SectionTitle>
               <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-5 border border-red-100">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl">🔍</span>
@@ -437,7 +461,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
 
           {/* ======= Cost of Inaction ======= */}
           <div>
-            <SectionTitle color="#EF4444">도입하지 않을 경우의 비용 (Cost of Inaction)</SectionTitle>
+            <SectionTitle color="#EF4444"><Tooltip text="AI를 도입하지 않고 현재 방식을 유지할 때 3년간 누적되는 총 비용">도입하지 않을 경우의 비용 (Cost of Inaction)</Tooltip></SectionTitle>
             <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-xl p-5 border border-red-200">
               <div className="flex items-center gap-4">
                 <div className="text-4xl">📉</div>
@@ -671,21 +695,38 @@ export default function ResultsView({ result, input, onReset }: Props) {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 no-print">
         <button
           onClick={handleDownloadPDF}
-          className="flex-1 py-4 bg-[#1B4F72] hover:bg-[#163D5A] text-white rounded-xl font-semibold text-base transition-all shadow-lg flex items-center justify-center gap-2"
+          className="py-3.5 bg-[#1B4F72] hover:bg-[#163D5A] text-white rounded-xl font-semibold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          PDF 리포트 다운로드
+          PDF 다운로드
+        </button>
+        <button
+          onClick={() => window.print()}
+          className="py-3.5 bg-white border-2 border-gray-300 text-gray-600 hover:border-gray-400 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+        >
+          🖨️ 인쇄
+        </button>
+        <button
+          onClick={() => {
+            const params = btoa(JSON.stringify({ i: input.industry, s: input.companySize, r: input.annualRevenue }));
+            const url = `${window.location.origin}?share=${params}`;
+            navigator.clipboard.writeText(url);
+            alert('공유 URL이 클립보드에 복사되었습니다!');
+          }}
+          className="py-3.5 bg-white border-2 border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+        >
+          🔗 URL 공유
         </button>
         <button
           onClick={onReset}
-          className="flex-1 py-4 bg-white border-2 border-[#00B4D8] text-[#00B4D8] hover:bg-[#00B4D8]/5 rounded-xl font-semibold text-base transition-all"
+          className="py-3.5 bg-white border-2 border-[#00B4D8] text-[#00B4D8] hover:bg-[#00B4D8]/5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
         >
-          새 시뮬레이션
+          🔄 새 시뮬레이션
         </button>
       </div>
     </div>

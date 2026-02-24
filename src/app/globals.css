@@ -134,10 +134,13 @@ input[type="number"] {
 
 /* Print styles */
 @media print {
-  body {
-    background: white;
+  body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  header, .no-print { display: none !important; }
+  .animate-fadeInUp, .animate-fadeIn, .animate-scaleIn, .animate-slideInRight {
+    animation: none !important; opacity: 1 !important; transform: none !important;
   }
-  header, .no-print {
-    display: none;
-  }
+  .stagger-children > * { animation: none !important; opacity: 1 !important; }
+  main { padding: 0 !important; }
+  .rounded-2xl { border-radius: 8px !important; }
+  .shadow-sm, .shadow-lg, .shadow-md { box-shadow: none !important; }
 }
