@@ -792,7 +792,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 no-print">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 no-print">
         <button
           onClick={handleDownloadPDF}
           className="py-3.5 bg-[#1B4F72] hover:bg-[#163D5A] text-white rounded-xl font-semibold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
@@ -842,6 +842,17 @@ export default function ResultsView({ result, input, onReset }: Props) {
           className="py-3.5 bg-white border-2 border-green-500 text-green-600 hover:bg-green-50 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
         >
           📊 엑셀 내보내기
+        </button>
+        <button
+          onClick={() => {
+            // #30: KakaoTalk share via URL
+            const text = `AI 도입 시 연간 ${result.totalYearlySaving.toLocaleString()}만원 절감, ROI ${result.moderateROI}% - AIDP ROI 시뮬레이터`;
+            const url = `https://sharer.kakao.com/talk/friends/picker/link?url=${encodeURIComponent(window.location.origin)}&text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank', 'width=500,height=600');
+          }}
+          className="py-3.5 bg-[#FEE500] text-[#3C1E1E] hover:bg-[#F5DC00] rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 border-2 border-[#FEE500]"
+        >
+          💬 카카오톡
         </button>
         <button
           onClick={onReset}

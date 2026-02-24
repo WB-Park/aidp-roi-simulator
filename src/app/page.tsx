@@ -144,7 +144,7 @@ export default function Home() {
   const industryPains = PAIN_POINTS[input.industry] || [];
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC]" role="main" lang="ko">
       {/* Header — sticky */}
       <header className="bg-gradient-to-r from-[#1B4F72] to-[#2563EB] text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -208,6 +208,27 @@ export default function Home() {
         {/* ====== STEP 1: 기업 프로필 ====== */}
         {step === 1 && (
           <div className="space-y-6 animate-fadeInUp">
+            {/* #27: Landing Hero */}
+            <div className="bg-gradient-to-br from-[#1B4F72] via-[#1E5A8A] to-[#2563EB] rounded-2xl p-6 md:p-8 text-white">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-3xl">🎯</span>
+                <span className="text-xs bg-white/20 px-3 py-1 rounded-full backdrop-blur">3분 소요 · 무료 분석</span>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black leading-tight mb-3">
+                AI 도입하면 우리 회사에서<br />
+                <span className="text-[#00B4D8]">얼마나 절약</span>할 수 있을까?
+              </h2>
+              <p className="text-sm text-blue-200 mb-4 max-w-lg">
+                업계 데이터 기반으로 귀사의 AI 자동화 ROI를 정밀 분석합니다. 숨은 비용까지 찾아내는 심층 리포트를 즉시 받아보세요.
+              </p>
+              <div className="flex flex-wrap gap-3 text-xs text-blue-200">
+                <span className="flex items-center gap-1">✅ 업계별 벤치마크 비교</span>
+                <span className="flex items-center gap-1">✅ 숨은 비용 발견</span>
+                <span className="flex items-center gap-1">✅ IT 컨설턴트 맞춤 분석</span>
+                <span className="flex items-center gap-1">✅ 3개년 ROI 시뮬레이션</span>
+              </div>
+            </div>
+
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
               <h2 className="text-xl font-bold text-[#1B4F72] mb-1">기업 프로필</h2>
               <p className="text-sm text-gray-500 mb-6">정확한 진단을 위해 기업 정보를 선택해주세요.</p>
@@ -335,15 +356,45 @@ export default function Home() {
                 )}
               </div>
 
+              {/* #29: Validation feedback */}
+              {!canStep1 && (input.industry || input.companySize || input.annualRevenue) && (
+                <div className="mb-3 p-3 bg-amber-50 rounded-xl border border-amber-100 text-xs text-amber-700">
+                  아직 선택하지 않은 항목: {[
+                    !input.industry && '산업 분류',
+                    !input.companySize && '기업 규모',
+                    !input.annualRevenue && '연 매출',
+                  ].filter(Boolean).join(', ')}
+                </div>
+              )}
               <button
                 onClick={() => setStep(2)}
                 disabled={!canStep1}
+                aria-label="다음 단계: 현황 진단"
                 className={`w-full py-4 rounded-xl text-white font-semibold text-base transition-all ${
                   canStep1 ? 'bg-[#00B4D8] hover:bg-[#0096B7] shadow-lg shadow-[#00B4D8]/20' : 'bg-gray-300 cursor-not-allowed'
                 }`}
               >
                 현황 진단하기 →
               </button>
+            </div>
+
+            {/* #26: FAQ Accordion */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+              <h3 className="text-lg font-bold text-[#1B4F72] mb-4">자주 묻는 질문</h3>
+              {[
+                { q: '분석 결과는 얼마나 정확한가요?', a: '업계 평균 벤치마크와 실제 성공 사례 데이터를 기반으로 보수적으로 산출됩니다. 실제 컨설팅 시 ±15% 오차 내에서 조정됩니다.' },
+                { q: '비용은 발생하나요?', a: 'ROI 시뮬레이션은 완전 무료입니다. 상세 컨설팅을 원하시면 무료 상담을 신청해주세요.' },
+                { q: '입력한 정보는 어떻게 처리되나요?', a: '분석 통계 개선 목적으로만 사용되며, 개인 식별 정보는 저장하지 않습니다. 고객사명은 선택사항입니다.' },
+                { q: '어떤 업무를 AI로 자동화할 수 있나요?', a: '데이터 입력, 보고서 작성, 정산, 고객응대, 품질검사 등 반복적이고 규칙 기반인 업무가 자동화에 가장 적합합니다.' },
+              ].map((faq, i) => (
+                <details key={i} className="group border-b border-gray-100 last:border-0">
+                  <summary className="cursor-pointer py-3 text-sm font-medium text-gray-700 flex items-center justify-between hover:text-[#00B4D8] transition">
+                    {faq.q}
+                    <span className="text-gray-400 group-open:rotate-180 transition-transform">▾</span>
+                  </summary>
+                  <p className="text-sm text-gray-500 pb-3 pl-1">{faq.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         )}
