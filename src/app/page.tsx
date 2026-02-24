@@ -27,6 +27,7 @@ export default function Home() {
     companySize: '',
     annualRevenue: '',
     urgencyLevel: 'planning',
+    freeText: '',
     painPoints: [],
     tasks: [],
     avgMonthlySalary: 350,
@@ -116,7 +117,7 @@ export default function Home() {
     setResult(null);
     setInput({
       customerName: '', industry: '', companySize: '', annualRevenue: '',
-      urgencyLevel: 'planning', painPoints: [], tasks: [],
+      urgencyLevel: 'planning', freeText: '', painPoints: [], tasks: [],
       avgMonthlySalary: 350, errorRate: 5, complianceRisk: false,
     });
   };
@@ -281,6 +282,26 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* 자유 텍스트 입력 */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  우리 회사 상황 <span className="text-gray-400 font-normal">(선택)</span>
+                </label>
+                <p className="text-xs text-gray-400 mb-3">현재 겪고 계신 어려움이나 자동화하고 싶은 업무를 자유롭게 적어주세요. AI 컨설턴트가 분석하여 맞춤 진단을 제공합니다.</p>
+                <textarea
+                  rows={4}
+                  placeholder="예: 매달 엑셀로 재고 정리하는데 3명이 일주일씩 매달려요. 베테랑 직원이 퇴사하면 업무가 마비되고, 수기로 하다 보니 실수도 잦습니다. 보고서 만드는 데만 매주 이틀은 걸리는 것 같아요..."
+                  value={input.freeText}
+                  onChange={e => setInput({ ...input, freeText: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/20 outline-none transition text-sm resize-none placeholder:text-gray-300"
+                />
+                {input.freeText.length > 0 && (
+                  <p className="text-xs text-[#00B4D8] mt-1.5 flex items-center gap-1">
+                    <span>🤖</span> IT 컨설턴트가 입력 내용을 기반으로 맞춤 분석을 제공합니다
+                  </p>
+                )}
               </div>
 
               <button

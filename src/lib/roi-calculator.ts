@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
-import type { SimulationInput, SimulationResult, TaskResult, HiddenCost, YearProjection, CaseStudy } from './supabase';
-import { INDUSTRY_BENCHMARKS, PAIN_POINTS } from './constants';
+import type { SimulationInput, SimulationResult, TaskResult, HiddenCost, YearProjection, CaseStudy, ConsultantAnalysis, ConsultantInsight } from './supabase';
+import { INDUSTRY_BENCHMARKS, PAIN_POINTS, TEXT_ANALYSIS_RULES, INDUSTRY_LABELS } from './constants';
 
 const WEEKS_PER_MONTH = 4.33;
 const WORKING_HOURS_PER_MONTH = 174; // 한국 기준
@@ -208,7 +208,23 @@ export async function calculateROI(input: SimulationInput): Promise<SimulationRe
     .map(p => p.label);
 
   // ============================================================
-  // 10. 히스토리 저장
+  // 10. 자유 텍스트 분석 → IT 컨설턴트 의견 생성
+  // ============================================================
+  let consultantAnalysis: ConsultantAnalysis | undefined;
+  if (input.freeText && input.freeText.trim().length >= 10) {
+    consultantAnalysis = analyzeText(input.freeText, input.industry, {
+      totalCurrentHoursMonthly,
+      totalSavedHoursMonthly,
+      totalMonthlySaving,
+      investmentCost,
+      moderateROI,
+      paybackMonths,
+      totalCurrentPeople,
+    });
+  }
+
+  // ============================================================
+  // 11. 히스토리 저장
   // ============================================================
   try {
     await supabase.from('aidp_simulations').insert({
@@ -251,5 +267,93 @@ export async function calculateROI(input: SimulationInput): Promise<SimulationRe
     matchedCases,
     addressedPainPoints,
     painPointCount: input.painPoints.length,
+    consultantAnalysis,
+  };
+}
+
+// ============================================================
+// 자유 텍스트 분석 엔진
+// ============================================================
+function analyzeText(
+  text: string,
+  industry: string,
+  metrics: {
+    totalCurrentHoursMonthly: number;
+    totalSavedHoursMonthly: number;
+    totalMonthlySaving: number;
+    investmentCost: number;
+    moderateROI: number;
+    paybackMonths: number;
+    totalCurrentPeople: number;
+  },
+): ConsultantAnalysis {
+  const normalizedText = text.toLowerCase().replace(/\s+/g, ' ');
+  const insights: ConsultantInsight[] = [];
+  const detectedKeywords: string[] = [];
+  const matchedCategories = new Set<string>();
+
+  // 키워드 매칭
+  for (const rule of TEXT_ANALYSIS_RULES) {
+    const matched = rule.keywords.filter(kw => normalizedText.includes(kw));
+    if (matched.length > 0) {
+      detectedKeywords.push(...matched);
+      if (!matchedCategories.has(rule.category)) {
+        matchedCategories.add(rule.category);
+        insights.push(rule.insight);
+      }
+    }
+  }
+
+  // 리스크 레벨 결정
+  const criticalCount = insights.filter(i => i.priority === 'critical').length;
+  const highCount = insights.filter(i => i.priority === 'high').length;
+  const riskLevel: 'high' | 'medium' | 'low' =
+    criticalCount >= 2 || (criticalCount >= 1 && highCount >= 2) ? 'high' :
+    criticalCount >= 1 || highCount >= 2 ? 'medium' : 'low';
+
+  // 우선 추천 포커스
+  const focusMap: Record<string, string> = {
+    hr: '인력 안정화를 위한 핵심 업무 자동화',
+    workload: '업무량 축소를 위한 반복 작업 자동화',
+    manual_work: '수작업 제거를 통한 즉각적 효율화',
+    quality: '품질 향상 및 오류 비용 제거',
+    growth: '비용 구조 혁신을 통한 수익성 개선',
+    system: '시스템 연동 자동화로 데이터 흐름 통합',
+    knowledge: '조직 지식 시스템화 및 속인화 해소',
+    compliance: '규정 준수 자동 검증 체계 구축',
+    supply_chain: 'AI 수요 예측 기반 재고 최적화',
+    customer: 'AI 고객 응대 자동화',
+    speed: '프로세스 병목 해소',
+    reporting: '실시간 데이터 기반 의사결정 체계',
+  };
+
+  // 우선순위가 가장 높은 카테고리 찾기
+  const topInsight = insights.sort((a, b) => {
+    const order = { critical: 0, high: 1, medium: 2 };
+    return order[a.priority] - order[b.priority];
+  })[0];
+
+  const topCategory = [...matchedCategories][0] || 'manual_work';
+  const recommendedFocus = focusMap[topCategory] || '핵심 반복 업무 AI 자동화';
+
+  // 종합 요약 생성
+  const industryLabel = INDUSTRY_LABELS[industry] || industry;
+  let summary = '';
+  if (insights.length === 0) {
+    summary = `${industryLabel} 분야의 일반적 현황으로, AI 자동화를 통해 월 ${metrics.totalSavedHoursMonthly}시간 절감이 가능합니다. 세부 상황을 더 적어주시면 맞춤형 진단이 가능합니다.`;
+  } else if (riskLevel === 'high') {
+    summary = `귀사의 상황은 AI 자동화가 "선택"이 아닌 "필수"인 단계입니다. ${insights.length}개 영역에서 심각한 비효율이 감지되었으며, 조속한 도입이 연간 ${metrics.totalMonthlySaving * 12}만원 이상의 가치를 만들어낼 수 있습니다.`;
+  } else if (riskLevel === 'medium') {
+    summary = `${industryLabel} 분야의 전형적인 디지털 전환 과제를 안고 계십니다. ${insights.length}개 핵심 영역의 자동화를 통해 ${metrics.paybackMonths}개월 내 투자 회수가 가능하며, 경쟁사 대비 우위 확보의 기회입니다.`;
+  } else {
+    summary = `현재 상황에서 AI 자동화는 점진적으로 도입하더라도 월 ${metrics.totalMonthlySaving}만원의 안정적 절감 효과가 기대됩니다. Quick Win 영역부터 시작하는 것을 권장합니다.`;
+  }
+
+  return {
+    summary,
+    insights: insights.slice(0, 4), // 최대 4개
+    detectedKeywords: [...new Set(detectedKeywords)],
+    riskLevel,
+    recommendedFocus,
   };
 }

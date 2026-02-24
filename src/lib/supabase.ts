@@ -49,11 +49,28 @@ export interface SimulationInput {
   companySize: string;
   annualRevenue: string;
   urgencyLevel: string;
+  freeText: string; // 자유 텍스트 입력 (회사 상황 설명)
   painPoints: string[];
   tasks: TaskInput[];
   avgMonthlySalary: number; // 만원
   errorRate: number; // %
   complianceRisk: boolean;
+}
+
+// === IT 컨설턴트 분석 결과 ===
+export interface ConsultantInsight {
+  icon: string;
+  title: string;
+  body: string;
+  priority: 'critical' | 'high' | 'medium';
+}
+
+export interface ConsultantAnalysis {
+  summary: string; // 1줄 요약
+  insights: ConsultantInsight[];
+  detectedKeywords: string[];
+  riskLevel: 'high' | 'medium' | 'low';
+  recommendedFocus: string;
 }
 
 export interface TaskResult {
@@ -127,4 +144,7 @@ export interface SimulationResult {
   // Pain point context
   addressedPainPoints: string[];
   painPointCount: number;
+
+  // Consultant analysis
+  consultantAnalysis?: ConsultantAnalysis;
 }

@@ -144,6 +144,76 @@ export default function ResultsView({ result, input, onReset }: Props) {
             </div>
           )}
 
+          {/* ======= IT Consultant Analysis ======= */}
+          {result.consultantAnalysis && (
+            <div>
+              <SectionTitle color="#8B5CF6">🧑‍💼 IT 컨설턴트 진단</SectionTitle>
+              <div className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 rounded-xl border border-purple-100 overflow-hidden">
+                {/* Summary Bar */}
+                <div className="bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] p-4 flex items-start gap-3">
+                  <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center text-xl shrink-0">🧑‍💼</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-purple-100 mb-0.5">IT 컨설턴트 종합 의견</p>
+                    <p className="text-white font-semibold text-sm leading-relaxed">{result.consultantAnalysis.summary}</p>
+                  </div>
+                  <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-bold ${
+                    result.consultantAnalysis.riskLevel === 'high'
+                      ? 'bg-red-500/20 text-red-100 border border-red-400/30'
+                      : result.consultantAnalysis.riskLevel === 'medium'
+                      ? 'bg-yellow-500/20 text-yellow-100 border border-yellow-400/30'
+                      : 'bg-green-500/20 text-green-100 border border-green-400/30'
+                  }`}>
+                    {result.consultantAnalysis.riskLevel === 'high' ? '⚠️ 고위험' : result.consultantAnalysis.riskLevel === 'medium' ? '⚡ 중간 위험' : '✅ 안정'}
+                  </span>
+                </div>
+
+                <div className="p-5 space-y-4">
+                  {/* Insight Cards */}
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {result.consultantAnalysis.insights.map((ins, i) => (
+                      <div key={i} className={`bg-white rounded-lg p-4 border ${
+                        ins.priority === 'critical' ? 'border-red-200 shadow-sm shadow-red-100' :
+                        ins.priority === 'high' ? 'border-orange-200 shadow-sm shadow-orange-50' :
+                        'border-gray-200'
+                      }`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xl">{ins.icon}</span>
+                          <p className="text-sm font-bold text-gray-800 flex-1">{ins.title}</p>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+                            ins.priority === 'critical' ? 'bg-red-100 text-red-600' :
+                            ins.priority === 'high' ? 'bg-orange-100 text-orange-600' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {ins.priority === 'critical' ? '긴급' : ins.priority === 'high' ? '높음' : '보통'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 leading-relaxed">{ins.body}</p>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Detected Keywords & Focus */}
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <div className="flex-1 bg-white rounded-lg p-3 border border-gray-100">
+                      <p className="text-xs text-gray-400 mb-2">감지된 핵심 키워드</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {result.consultantAnalysis.detectedKeywords.map((kw, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-purple-50 text-purple-600 text-xs font-medium rounded-full border border-purple-100">
+                            {kw}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex-1 bg-white rounded-lg p-3 border border-gray-100">
+                      <p className="text-xs text-gray-400 mb-2">추천 우선 집중 영역</p>
+                      <p className="text-sm font-semibold text-[#8B5CF6]">{result.consultantAnalysis.recommendedFocus}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* ======= Pain Points Addressed ======= */}
           {result.addressedPainPoints.length > 0 && (
             <div>

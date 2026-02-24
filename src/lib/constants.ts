@@ -195,3 +195,158 @@ export const INDUSTRY_LABELS: Record<string, string> = {
   healthcare: '의료/바이오',
   logistics: '물류/운송',
 };
+
+// === 자유 텍스트 분석용 키워드 → 인사이트 매핑 ===
+export interface TextKeywordRule {
+  keywords: string[];
+  category: string;
+  insight: {
+    icon: string;
+    title: string;
+    body: string;
+    priority: 'critical' | 'high' | 'medium';
+  };
+  suggestedPainPoints?: string[]; // auto-suggest pain point IDs
+}
+
+export const TEXT_ANALYSIS_RULES: TextKeywordRule[] = [
+  // === 인력/조직 이슈 ===
+  {
+    keywords: ['퇴사', '이직', '인력 부족', '채용', '사람이 없', '구인', '인력난', '퇴직', '인수인계'],
+    category: 'hr',
+    insight: {
+      icon: '👥',
+      title: '인력 리스크가 핵심 과제입니다',
+      body: '인력 이탈과 채용 난이도가 높은 상황에서, AI 자동화는 단순 비용 절감을 넘어 "사람이 없어도 돌아가는 시스템"을 구축하는 생존 전략입니다. 핵심 업무의 자동화부터 우선 적용하여 인력 의존도를 낮추는 것을 권장합니다.',
+      priority: 'critical',
+    },
+    suggestedPainPoints: ['mp6', 'sp1', 'rp3'],
+  },
+  {
+    keywords: ['야근', '주말', '업무량', '과로', '번아웃', '워라밸', '야간', '잔업'],
+    category: 'workload',
+    insight: {
+      icon: '🔥',
+      title: '업무 과부하 — 자동화 없이는 지속 불가능',
+      body: '직원들의 만성적 과로는 품질 저하, 이직률 증가, 안전사고로 이어집니다. 반복 업무의 AI 자동화를 통해 업무 시간을 물리적으로 줄여야 합니다. 특히 데이터 입력·보고서 작성 등 "시간만 잡아먹는" 업무부터 자동화하면 즉각적인 체감 효과가 있습니다.',
+      priority: 'critical',
+    },
+  },
+  // === 데이터/시스템 이슈 ===
+  {
+    keywords: ['엑셀', 'excel', '수작업', '수기', '복사', '붙여넣기', '수동', '메일로', '카톡으로'],
+    category: 'manual_work',
+    insight: {
+      icon: '📋',
+      title: '수작업 의존 — 자동화 ROI가 가장 높은 영역',
+      body: '엑셀 기반 수작업은 AI 자동화의 "로우 행잉 프루트"입니다. 데이터 입력·정리·보고서 생성 자동화만으로도 월 수십~수백 시간을 절감할 수 있으며, 오류율 감소 효과까지 더하면 실질 ROI는 표면 수치의 1.5~2배에 달합니다.',
+      priority: 'high',
+    },
+    suggestedPainPoints: ['mp1', 'mp5', 'rp6', 'fp4'],
+  },
+  {
+    keywords: ['시스템', 'ERP', 'MES', 'SAP', '레거시', '노후', '통합', '연동', '파편화', '분산'],
+    category: 'system',
+    insight: {
+      icon: '🔗',
+      title: '시스템 분산 — AI가 "디지털 접착제" 역할 가능',
+      body: '여러 시스템이 연동되지 않는 상황에서 AI 에이전트가 시스템 간 데이터를 자동으로 연결·변환·동기화하는 역할을 할 수 있습니다. 전면 시스템 교체 없이도 기존 인프라 위에 AI 레이어를 덧씌우는 방식으로 빠르게 효과를 얻을 수 있습니다.',
+      priority: 'high',
+    },
+    suggestedPainPoints: ['sp2', 'rp8'],
+  },
+  // === 품질/오류 이슈 ===
+  {
+    keywords: ['실수', '오류', '불량', '재작업', '오타', '누락', '검수', '품질', '클레임'],
+    category: 'quality',
+    insight: {
+      icon: '🎯',
+      title: '품질 이슈 — 숨은 비용이 직접 비용보다 클 수 있습니다',
+      body: '수작업 오류로 인한 재작업·클레임·고객 이탈 비용은 보통 직접 인건비의 15~30%에 달합니다. AI 도입 시 오류율 80% 이상 감소를 기대할 수 있으며, 이 숨은 비용 절감만으로도 투자 회수가 가능한 경우가 많습니다.',
+      priority: 'high',
+    },
+    suggestedPainPoints: ['mp1', 'mp3', 'rp5', 'lp4'],
+  },
+  // === 경영/성장 이슈 ===
+  {
+    keywords: ['매출', '성장', '경쟁', '경쟁사', '시장', '확장', '스케일', '규모', '비용 절감', '원가'],
+    category: 'growth',
+    insight: {
+      icon: '📈',
+      title: '성장 병목 — AI가 "비용 구조"를 바꿉니다',
+      body: '매출 성장에 비례하여 인력을 늘려야 하는 구조는 한계가 있습니다. AI 자동화로 고정비 성격의 반복 업무를 줄이면, 매출이 늘어도 인력은 덜 늘어나는 "레버리지" 구조로 전환됩니다. 이는 3년 후 영업이익률에 5~15%p 차이를 만들 수 있습니다.',
+      priority: 'high',
+    },
+  },
+  {
+    keywords: ['보고', '리포트', '보고서', '집계', '현황', '대시보드', '의사결정', '데이터 분석'],
+    category: 'reporting',
+    insight: {
+      icon: '📊',
+      title: '의사결정 속도 — 실시간 데이터가 경쟁력',
+      body: '주간/월간 보고서를 수작업으로 만드는 시간 동안 시장은 이미 변하고 있습니다. AI 기반 실시간 대시보드 구축으로 "보고서 작성 → 보고 → 의사결정" 사이클을 "즉시 확인 → 즉시 결정"으로 단축하면, 시간 절감 이상의 경영 가치를 창출합니다.',
+      priority: 'medium',
+    },
+    suggestedPainPoints: ['mp2', 'mp5', 'fp4', 'rp6'],
+  },
+  // === 고객/서비스 이슈 ===
+  {
+    keywords: ['고객', '응대', 'CS', '문의', '불만', '컴플레인', '응답', '대응', '서비스'],
+    category: 'customer',
+    insight: {
+      icon: '💬',
+      title: '고객 응대 — AI로 "24시간 즉각 대응" 가능',
+      body: '고객 문의의 60~70%는 패턴화된 반복 질문입니다. AI 챗봇/자동 응답 시스템으로 1차 응대를 자동화하면, 인력은 복잡한 VIP 이슈에 집중하면서도 전체 응답 시간은 크게 단축됩니다. 고객 만족도와 비용 효율 두 마리 토끼를 잡을 수 있습니다.',
+      priority: 'medium',
+    },
+    suggestedPainPoints: ['sp1', 'rp3', 'rp7'],
+  },
+  // === 규정/컴플라이언스 ===
+  {
+    keywords: ['규정', '법규', '인증', 'ISO', '감사', '컴플라이언스', '규제', 'GMP', '인허가'],
+    category: 'compliance',
+    insight: {
+      icon: '⚖️',
+      title: '규정 준수 — 자동화가 리스크를 줄입니다',
+      body: '수작업 검증의 누락은 과태료, 인증 취소, 사업 중단으로 이어질 수 있습니다. AI 기반 자동 검증 시스템은 100% 항목을 빠짐없이 체크하면서도 검증 시간을 80% 이상 단축합니다. 특히 규제가 강한 산업일수록 ROI가 높습니다.',
+      priority: 'high',
+    },
+    suggestedPainPoints: ['fp2', 'hp3'],
+  },
+  // === 재고/공급망 ===
+  {
+    keywords: ['재고', '발주', '납기', '납품', '공급', '구매', '자재', '원자재', '공급망', '입고'],
+    category: 'supply_chain',
+    insight: {
+      icon: '📦',
+      title: '재고·공급망 — AI 예측으로 "적정 재고" 달성',
+      body: '과잉 재고는 자금을 묶고, 재고 부족은 매출 기회를 잃게 합니다. AI 수요 예측과 자동 발주 시스템은 재고 정확도를 90% 이상으로 끌어올리며, 이는 연간 매출의 2~5%에 해당하는 비용을 절감시킵니다.',
+      priority: 'high',
+    },
+    suggestedPainPoints: ['mp4', 'mp8', 'rp1', 'rp2'],
+  },
+  // === 속도/지연 ===
+  {
+    keywords: ['느리', '지연', '늦', '병목', '대기', '오래 걸', '시간이 걸'],
+    category: 'speed',
+    insight: {
+      icon: '⏰',
+      title: '프로세스 병목 — 속도가 곧 경쟁력',
+      body: '처리 지연은 고객 이탈, 비용 증가, 직원 불만의 직접적 원인입니다. AI 자동화는 수시간~수일 걸리던 프로세스를 수분 내로 단축시킵니다. 특히 승인·검토·집계 등 "누군가를 기다리는" 업무의 자동화가 가장 큰 체감 효과를 줍니다.',
+      priority: 'medium',
+    },
+    suggestedPainPoints: ['mp8', 'fp1', 'lp6'],
+  },
+  // === 노하우/속인화 ===
+  {
+    keywords: ['노하우', '베테랑', '경험', '속인화', '한 명만', '특정 사람', '전임자', '인수인계 안'],
+    category: 'knowledge',
+    insight: {
+      icon: '🧠',
+      title: '속인화 리스크 — 조직 지식을 시스템에 담아야',
+      body: '"그 사람만 아는" 업무가 많다면, 퇴사 한 건으로 사업이 흔들릴 수 있습니다. AI 기반 업무 자동화는 암묵지를 형식지로 전환하는 과정이기도 합니다. 핵심 인력의 노하우를 AI 시스템에 내재화하여 조직 리스크를 줄이는 것이 급선무입니다.',
+      priority: 'critical',
+    },
+    suggestedPainPoints: ['mp6'],
+  },
+];
