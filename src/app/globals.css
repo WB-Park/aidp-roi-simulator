@@ -126,6 +126,11 @@ input[type="number"] {
 .stagger-children > *:nth-child(7) { animation-delay: 480ms; }
 .stagger-children > *:nth-child(8) { animation-delay: 560ms; }
 
+/* #25 Micro-interactions */
+button:active:not(:disabled) { transform: scale(0.97); }
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.hover-lift:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+
 /* Mobile improvements */
 @media (max-width: 640px) {
   .task-card-mobile { flex-direction: column; gap: 0.75rem; }

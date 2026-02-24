@@ -429,6 +429,37 @@ export default function ResultsView({ result, input, onReset }: Props) {
             </div>
           </div>
 
+          {/* ======= #22 Risk Gauge ======= */}
+          <div>
+            <SectionTitle>투자 안정성 게이지</SectionTitle>
+            <div className="bg-gray-50 rounded-xl p-5 flex items-center gap-6">
+              <div className="relative w-28 h-14 overflow-hidden">
+                <svg viewBox="0 0 120 60" className="w-full h-full">
+                  {/* Background arc */}
+                  <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="#E5E7EB" strokeWidth="8" strokeLinecap="round" />
+                  {/* Colored arc */}
+                  <path d="M10 55 A50 50 0 0 1 110 55" fill="none"
+                    stroke={result.moderateROI >= 100 ? '#10B981' : result.moderateROI >= 30 ? '#F59E0B' : '#EF4444'}
+                    strokeWidth="8" strokeLinecap="round"
+                    strokeDasharray={`${Math.min(Math.max(result.moderateROI, 0), 200) / 200 * 157} 157`}
+                  />
+                  {/* Needle */}
+                  <circle cx="60" cy="55" r="4" fill={result.moderateROI >= 100 ? '#10B981' : result.moderateROI >= 30 ? '#F59E0B' : '#EF4444'} />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-2xl font-black" style={{ color: result.moderateROI >= 100 ? '#10B981' : result.moderateROI >= 30 ? '#F59E0B' : '#EF4444' }}>
+                  {result.moderateROI >= 100 ? '매우 안정적' : result.moderateROI >= 30 ? '양호' : '주의 필요'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {result.paybackMonths <= 6 ? '투자 회수가 빠르고 리스크가 낮습니다.' :
+                   result.paybackMonths <= 12 ? '1년 이내 투자 회수가 가능한 양호한 수준입니다.' :
+                   '투자 회수 기간이 다소 길어 단계적 접근을 권장합니다.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* ======= ROI Scenarios ======= */}
           <div>
             <SectionTitle>ROI 시나리오 분석</SectionTitle>
@@ -469,7 +500,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
                 {result.yearProjections.map(yp => {
                   const maxVal = Math.max(...result.yearProjections.map(y => y.cumulativeSaving));
                   return (
-                    <div key={yp.year}>
+                    <div key={yp.year} className="group cursor-pointer hover:bg-white/60 rounded-lg p-2 -mx-2 transition-all">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm font-semibold text-gray-700">{yp.year}년차</span>
                         <div className="text-right">
@@ -481,17 +512,23 @@ export default function ResultsView({ result, input, onReset }: Props) {
                       </div>
                       <div className="flex gap-1 h-7">
                         <div
-                          className="bg-[#00B4D8] rounded-l-md flex items-center justify-end pr-2 transition-all"
+                          className="bg-[#00B4D8] rounded-l-md flex items-center justify-end pr-2 transition-all group-hover:brightness-110"
                           style={{ width: `${(yp.cumulativeSaving / maxVal) * 100}%`, minWidth: 40 }}
                         >
                           <span className="text-xs text-white font-semibold">{yp.cumulativeSaving.toLocaleString()}</span>
                         </div>
                         <div
-                          className="bg-red-400 rounded-r-md flex items-center pl-2"
+                          className="bg-red-400 rounded-r-md flex items-center pl-2 transition-all group-hover:brightness-110"
                           style={{ width: `${(yp.cumulativeInvestment / maxVal) * 100}%`, minWidth: 40 }}
                         >
                           <span className="text-xs text-white font-semibold">-{yp.cumulativeInvestment.toLocaleString()}</span>
                         </div>
+                      </div>
+                      {/* Hover detail */}
+                      <div className="hidden group-hover:flex gap-4 mt-2 text-xs text-gray-500">
+                        <span>누적 절감: {yp.cumulativeSaving.toLocaleString()}만원</span>
+                        <span>누적 투자: {yp.cumulativeInvestment.toLocaleString()}만원</span>
+                        <span>순이익: {yp.netBenefit.toLocaleString()}만원</span>
                       </div>
                     </div>
                   );
@@ -712,19 +749,33 @@ export default function ResultsView({ result, input, onReset }: Props) {
             )}
           </div>
 
-          {/* ======= CTA ======= */}
-          <div className="bg-gradient-to-r from-[#1B4F72] to-[#2563EB] rounded-xl p-6 text-white text-center">
-            <h3 className="text-lg font-bold mb-2">AI 도입, 더 구체적으로 상담받으세요</h3>
-            <p className="text-sm text-blue-200 mb-4">
-              위시켓 AIDP 전문 컨설턴트가 귀사에 맞는 최적의 AI 도입 전략을 설계해드립니다.
+          {/* ======= CTA (#24: urgency-based) ======= */}
+          <div className={`rounded-xl p-6 text-white text-center ${
+            input.urgencyLevel === 'critical' ? 'bg-gradient-to-r from-red-600 to-red-500' :
+            input.urgencyLevel === 'urgent' ? 'bg-gradient-to-r from-orange-600 to-amber-500' :
+            'bg-gradient-to-r from-[#1B4F72] to-[#2563EB]'
+          }`}>
+            <h3 className="text-lg font-bold mb-2">
+              {input.urgencyLevel === 'critical' ? '⚡ 지금 바로 시작해야 합니다' :
+               input.urgencyLevel === 'urgent' ? '🔥 이번 분기가 최적의 타이밍입니다' :
+               'AI 도입, 더 구체적으로 상담받으세요'}
+            </h3>
+            <p className="text-sm opacity-80 mb-4">
+              {input.urgencyLevel === 'critical'
+                ? `매월 ${result.totalMonthlySaving.toLocaleString()}만원이 낭비되고 있습니다. 하루라도 빨리 시작하면 연간 ${result.totalYearlySaving.toLocaleString()}만원을 아낄 수 있습니다.`
+                : input.urgencyLevel === 'urgent'
+                ? `${result.paybackMonths}개월이면 투자를 회수합니다. 지금 시작하면 올해 안에 효과를 체감할 수 있습니다.`
+                : '위시켓 AIDP 전문 컨설턴트가 귀사에 맞는 최적의 AI 도입 전략을 설계해드립니다.'}
             </p>
             <a
               href="https://www.wishket.com/aidp"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-white text-[#1B4F72] font-bold px-8 py-3 rounded-xl hover:bg-blue-50 transition"
+              className="inline-block bg-white text-gray-800 font-bold px-8 py-3 rounded-xl hover:bg-gray-100 transition shadow-lg"
             >
-              무료 상담 신청하기 →
+              {input.urgencyLevel === 'critical' ? '긴급 상담 신청하기 →' :
+               input.urgencyLevel === 'urgent' ? '빠른 상담 신청하기 →' :
+               '무료 상담 신청하기 →'}
             </a>
           </div>
 
@@ -741,7 +792,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 no-print">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 no-print">
         <button
           onClick={handleDownloadPDF}
           className="py-3.5 bg-[#1B4F72] hover:bg-[#163D5A] text-white rounded-xl font-semibold text-sm transition-all shadow-lg flex items-center justify-center gap-2"
@@ -767,6 +818,30 @@ export default function ResultsView({ result, input, onReset }: Props) {
           className="py-3.5 bg-white border-2 border-[#8B5CF6] text-[#8B5CF6] hover:bg-[#8B5CF6]/5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
         >
           🔗 URL 공유
+        </button>
+        <button
+          onClick={() => {
+            // #23: Export to CSV (lightweight Excel alternative)
+            const rows = [
+              ['업무', '인원', '현재 시간/월', '자동화율', '절감 시간', '절감액/월'],
+              ...result.taskResults.map(t => [t.label, t.currentPeople, t.currentHoursMonthly, `${Math.round(t.automationRate * 100)}%`, t.savedHoursMonthly, t.savedCostMonthly]),
+              [],
+              ['합계', result.totalCurrentPeople, result.totalCurrentHoursMonthly, '', result.totalSavedHoursMonthly, result.directMonthlySaving],
+              [], ['연간 총 절감액', result.totalYearlySaving, '만원'],
+              ['투자비용', result.investmentCost, '만원'],
+              ['ROI', result.moderateROI, '%'],
+              ['회수기간', result.paybackMonths, '개월'],
+            ];
+            const csv = '\uFEFF' + rows.map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `AIDP_ROI_${input.customerName || '시뮬레이션'}.csv`;
+            link.click();
+          }}
+          className="py-3.5 bg-white border-2 border-green-500 text-green-600 hover:bg-green-50 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+        >
+          📊 엑셀 내보내기
         </button>
         <button
           onClick={onReset}
@@ -813,7 +888,7 @@ function ScenarioCard({ title, roi, saving, desc, color, bg, highlighted }: {
   title: string; roi: number; saving: number; desc: string; color: string; bg: string; highlighted?: boolean;
 }) {
   return (
-    <div className={`${bg} rounded-xl p-5 ${highlighted ? 'border-2 border-[#00B4D8] shadow-md shadow-[#00B4D8]/10' : 'border border-gray-200'}`}>
+    <div className={`${bg} rounded-xl p-5 hover-lift ${highlighted ? 'border-2 border-[#00B4D8] shadow-md shadow-[#00B4D8]/10' : 'border border-gray-200'}`}>
       <div className="flex items-center gap-2 mb-3">
         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
         <p className="text-sm font-bold" style={{ color }}>{title} 시나리오</p>
