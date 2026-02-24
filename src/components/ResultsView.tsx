@@ -1,8 +1,30 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import type { SimulationResult, SimulationInput } from '@/lib/supabase';
 import { INDUSTRY_LABELS, INDUSTRY_BENCHMARKS } from '@/lib/constants';
+
+// === Count-up animation hook ===
+function useCountUp(end: number, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const startTime = useRef<number | null>(null);
+  const animFrame = useRef<number>(0);
+
+  useEffect(() => {
+    startTime.current = null;
+    const step = (ts: number) => {
+      if (!startTime.current) startTime.current = ts;
+      const progress = Math.min((ts - startTime.current) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      setValue(Math.round(eased * end));
+      if (progress < 1) animFrame.current = requestAnimationFrame(step);
+    };
+    animFrame.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animFrame.current);
+  }, [end, duration]);
+
+  return value;
+}
 
 interface Props {
   result: SimulationResult;
@@ -48,7 +70,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
   const directCostMonthly = Math.round(result.totalCurrentHoursMonthly * (input.avgMonthlySalary / 174));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fadeIn">
       <div ref={reportRef} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" style={{ maxWidth: 900 }}>
         {/* ======= Report Header ======= */}
         <div className="bg-gradient-to-r from-[#1B4F72] via-[#1E5A8A] to-[#2563EB] text-white p-6 md:p-8">
@@ -78,7 +100,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
           {/* ======= Executive Summary ======= */}
           <div>
             <SectionTitle>핵심 요약 (Executive Summary)</SectionTitle>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
               <MetricCard
                 label="월간 절감 시간"
                 value={`${result.totalSavedHoursMonthly.toLocaleString()}`}
@@ -581,11 +603,13 @@ function SectionTitle({ children, color }: { children: React.ReactNode; color?: 
 function MetricCard({ label, value, unit, sub, color }: {
   label: string; value: string; unit: string; sub: string; color: string;
 }) {
+  const numericVal = parseInt(value.replace(/,/g, ''), 10) || 0;
+  const animated = useCountUp(numericVal, 1400);
   return (
-    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 animate-scaleIn">
       <p className="text-xs text-gray-500 mb-1">{label}</p>
       <div className="flex items-baseline gap-1">
-        <span className="text-2xl font-black" style={{ color }}>{value}</span>
+        <span className="text-2xl font-black" style={{ color }}>{animated.toLocaleString()}</span>
         <span className="text-sm font-semibold" style={{ color }}>{unit}</span>
       </div>
       <p className="text-xs text-gray-400 mt-1">{sub}</p>

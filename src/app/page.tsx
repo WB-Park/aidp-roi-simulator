@@ -126,8 +126,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-[#1B4F72] to-[#2563EB] text-white shadow-lg">
+      {/* Header — sticky */}
+      <header className="bg-gradient-to-r from-[#1B4F72] to-[#2563EB] text-white shadow-lg sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center font-bold text-sm">AI</div>
@@ -137,6 +137,9 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {step < 4 && step > 1 && (
+              <span className="text-xs text-blue-200 hidden sm:block">진행률 {Math.round(((step - 1) / 3) * 100)}%</span>
+            )}
             {step === 4 && (
               <button onClick={handleReset} className="text-sm bg-white/15 hover:bg-white/25 px-4 py-2 rounded-lg transition backdrop-blur">
                 새 시뮬레이션
@@ -144,6 +147,15 @@ export default function Home() {
             )}
           </div>
         </div>
+        {/* Progress bar under header */}
+        {step < 4 && (
+          <div className="h-1 bg-white/10">
+            <div
+              className="h-full bg-[#00B4D8] transition-all duration-500 ease-out"
+              style={{ width: `${((step - 1) / 3) * 100}%` }}
+            />
+          </div>
+        )}
       </header>
 
       {/* Progress Bar */}
@@ -176,7 +188,7 @@ export default function Home() {
       <main className="max-w-5xl mx-auto px-4 pb-16">
         {/* ====== STEP 1: 기업 프로필 ====== */}
         {step === 1 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeInUp">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
               <h2 className="text-xl font-bold text-[#1B4F72] mb-1">기업 프로필</h2>
               <p className="text-sm text-gray-500 mb-6">정확한 진단을 위해 기업 정보를 선택해주세요.</p>
@@ -319,7 +331,7 @@ export default function Home() {
 
         {/* ====== STEP 2: 현황 진단 ====== */}
         {step === 2 && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeInUp">
             {/* Pain Points */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
               <div className="flex items-center justify-between mb-1">
@@ -403,6 +415,7 @@ export default function Home() {
                         className={`w-6 h-6 rounded flex-shrink-0 flex items-center justify-center transition ${
                           task.enabled ? 'bg-[#00B4D8] text-white' : 'bg-gray-200'
                         }`}
+                        aria-label={`${task.label} 자동화 ${task.enabled ? '비활성화' : '활성화'}`}
                       >
                         {task.enabled && <span className="text-xs">✓</span>}
                       </button>
@@ -423,7 +436,7 @@ export default function Home() {
 
                       {/* Inputs */}
                       {task.enabled && (
-                        <div className="flex items-center gap-3 flex-wrap">
+                        <div className="flex items-center gap-3 flex-wrap task-inputs">
                           <div className="flex items-center gap-1">
                             <label className="text-xs text-gray-400">인원</label>
                             <input
@@ -476,7 +489,7 @@ export default function Home() {
 
         {/* ====== STEP 3: 비용 구조 ====== */}
         {step === 3 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+          <div className="animate-fadeInUp bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
             <div className="flex items-center justify-between mb-1">
               <h2 className="text-xl font-bold text-[#1B4F72]">비용 구조 확인</h2>
               <button onClick={() => setStep(2)} className="text-sm text-[#00B4D8] hover:underline">← 이전</button>
