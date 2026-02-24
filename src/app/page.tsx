@@ -357,7 +357,19 @@ export default function Home() {
                 <h2 className="text-xl font-bold text-[#1B4F72]">현재 겪고 계신 고통은?</h2>
                 <button onClick={() => setStep(1)} className="text-sm text-[#00B4D8] hover:underline">← 이전</button>
               </div>
-              <p className="text-sm text-gray-500 mb-5">해당되는 항목을 모두 선택해주세요. <span className="text-[#00B4D8] font-semibold">{input.painPoints.length}개 선택됨</span></p>
+              <div className="flex items-center gap-3 mb-5">
+                <p className="text-sm text-gray-500">해당되는 항목을 모두 선택해주세요. <span className="text-[#00B4D8] font-semibold">{input.painPoints.length}개 선택됨</span></p>
+                <button
+                  onClick={() => {
+                    const allIds = industryPains.map(p => p.id);
+                    const allSelected = allIds.every(id => input.painPoints.includes(id));
+                    setInput(prev => ({ ...prev, painPoints: allSelected ? [] : allIds }));
+                  }}
+                  className="text-xs px-3 py-1 rounded-full border border-[#00B4D8] text-[#00B4D8] hover:bg-[#00B4D8]/5 transition shrink-0"
+                >
+                  {industryPains.length > 0 && industryPains.every(p => input.painPoints.includes(p.id)) ? '전체 해제' : '전체 선택'}
+                </button>
+              </div>
 
               <div className="grid gap-2 md:grid-cols-2">
                 {industryPains.map(pain => {
@@ -492,6 +504,50 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+
+              {/* #17: Add custom task */}
+              <button
+                onClick={() => {
+                  const id = `custom_${Date.now()}`;
+                  setInput(prev => ({
+                    ...prev,
+                    tasks: [...prev.tasks, {
+                      id, category: 'custom', label: '커스텀 업무', peopleCount: 1,
+                      hoursPerPersonWeek: 5, enabled: true, automationRate: 0.6, feasibility: 'medium' as const,
+                    }],
+                  }));
+                }}
+                className="mt-3 w-full py-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-400 hover:border-[#00B4D8] hover:text-[#00B4D8] transition text-sm font-medium"
+              >
+                + 업무 추가
+              </button>
+
+              {/* #18: Live ROI Preview */}
+              {liveStats.totalHours > 0 && input.avgMonthlySalary > 0 && (
+                <div className="mt-4 bg-gradient-to-r from-emerald-50 to-cyan-50 rounded-xl p-4 border border-emerald-100">
+                  <p className="text-xs text-gray-500 mb-2">💡 예상 절감 미리보기</p>
+                  <div className="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                      <p className="text-xs text-gray-400">예상 월 절감 시간</p>
+                      <p className="text-lg font-bold text-[#00B4D8]">
+                        {Math.round(input.tasks.filter(t => t.enabled).reduce((s, t) => s + t.peopleCount * t.hoursPerPersonWeek * 4.33 * t.automationRate, 0))}h
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400">예상 월 절감액</p>
+                      <p className="text-lg font-bold text-[#10B981]">
+                        {Math.round(input.tasks.filter(t => t.enabled).reduce((s, t) => s + t.peopleCount * t.hoursPerPersonWeek * 4.33 * t.automationRate * (input.avgMonthlySalary / 174), 0)).toLocaleString()}만원
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-400">연간 환산</p>
+                      <p className="text-lg font-bold text-[#8B5CF6]">
+                        {Math.round(input.tasks.filter(t => t.enabled).reduce((s, t) => s + t.peopleCount * t.hoursPerPersonWeek * 4.33 * t.automationRate * (input.avgMonthlySalary / 174), 0) * 12).toLocaleString()}만원
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <button
                 onClick={() => setStep(3)}

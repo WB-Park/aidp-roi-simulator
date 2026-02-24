@@ -50,6 +50,18 @@ export default function ResultsView({ result, input, onReset }: Props) {
   const [whatIfMultiplier, setWhatIfMultiplier] = useState(1.0);
   const [emailInput, setEmailInput] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [simCount, setSimCount] = useState(0);
+
+  // #20: Fetch simulation count from Supabase
+  useEffect(() => {
+    (async () => {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const { count } = await supabase.from('aidp_simulations').select('*', { count: 'exact', head: true });
+        if (count) setSimCount(count);
+      } catch {}
+    })();
+  }, []);
 
   const handleDownloadPDF = async () => {
     const html2canvas = (await import('html2canvas')).default;
@@ -101,6 +113,7 @@ export default function ResultsView({ result, input, onReset }: Props) {
             <div className="text-right text-xs text-blue-200">
               <p>{new Date().toLocaleDateString('ko-KR')} 작성</p>
               <p>v2.0 분석 엔진</p>
+              {simCount > 0 && <p className="mt-1 text-blue-300 font-medium">{simCount.toLocaleString()}개 기업이 분석 완료</p>}
             </div>
           </div>
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-blue-100">
@@ -319,6 +332,39 @@ export default function ResultsView({ result, input, onReset }: Props) {
               </div>
             </div>
           )}
+
+          {/* ======= #19 Before/After Visual ======= */}
+          <div>
+            <SectionTitle>Before → After 비교</SectionTitle>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-red-50 rounded-xl p-5 border border-red-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">😩</span>
+                  <p className="text-sm font-bold text-red-700">현재 (Before)</p>
+                </div>
+                <div className="space-y-2 text-sm text-red-600">
+                  <p>📌 월 {result.totalCurrentHoursMonthly.toLocaleString()}시간 수작업</p>
+                  <p>📌 {result.totalCurrentPeople}명 반복 업무 투입</p>
+                  <p>📌 숨은 비용 월 {result.totalHiddenMonthlyCost.toLocaleString()}만원</p>
+                  {result.taskResults.filter(t => t.feasibility === 'high').length > 0 && (
+                    <p>📌 즉시 자동화 가능 업무 {result.taskResults.filter(t => t.feasibility === 'high').length}개 방치</p>
+                  )}
+                </div>
+              </div>
+              <div className="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xl">🚀</span>
+                  <p className="text-sm font-bold text-emerald-700">AI 도입 후 (After)</p>
+                </div>
+                <div className="space-y-2 text-sm text-emerald-600">
+                  <p>✅ 월 {result.totalSavedHoursMonthly.toLocaleString()}시간 자동화</p>
+                  <p>✅ 연간 {result.totalYearlySaving.toLocaleString()}만원 절감</p>
+                  <p>✅ ROI {result.moderateROI}% 달성</p>
+                  <p>✅ {result.paybackMonths}개월 내 투자 회수</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* ======= Task Breakdown ======= */}
           <div>
