@@ -100,46 +100,92 @@ export default function ResultsView({ result, input, onReset }: Props) {
   return (
     <div className="space-y-6 animate-fadeIn">
       <div ref={reportRef} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" style={{ maxWidth: 900 }}>
-        {/* ======= Report Header ======= */}
-        <div className="bg-gradient-to-r from-[#1B4F72] via-[#1E5A8A] to-[#2563EB] text-white p-6 md:p-8">
-          <div className="flex items-start justify-between mb-4">
+        {/* ======= Report Header — Professional & Trustworthy ======= */}
+        <div className="bg-[#1B4F72] text-white p-6 md:p-8">
+          <div className="flex items-start justify-between mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center font-bold">AI</div>
+              <svg width="40" height="40" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="6" fill="white" fillOpacity="0.15"/>
+                <path d="M7 20L14 8L21 20H7Z" fill="#00B4D8" opacity="0.9"/>
+                <circle cx="14" cy="12" r="3" fill="white"/>
+              </svg>
               <div>
-                <p className="text-xs text-blue-200">위시켓 AIDP 심층 분석</p>
-                <h2 className="text-xl font-bold">AI 도입 ROI 진단 리포트</h2>
+                <h2 className="text-xl font-bold tracking-tight">AI 도입 ROI 진단 리포트</h2>
+                <p className="text-xs text-blue-300 mt-0.5">위시켓 AIDP 분석 엔진 · {new Date().toLocaleDateString('ko-KR')} 생성</p>
               </div>
             </div>
-            <div className="text-right text-xs text-blue-200">
-              <p>{new Date().toLocaleDateString('ko-KR')} 작성</p>
-              <p>v2.0 분석 엔진</p>
-              {simCount > 0 && <p className="mt-1 text-blue-300 font-medium">{simCount.toLocaleString()}개 기업이 분석 완료</p>}
+            <div className="text-right text-xs text-blue-300">
+              {simCount > 0 && <p className="font-medium text-blue-200">{simCount.toLocaleString()}개 기업 분석 완료</p>}
+              <p className="mt-1 opacity-70">Confidential Report</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-blue-100">
-            {input.customerName && <span>고객사: <strong className="text-white">{input.customerName}</strong></span>}
-            <span>산업: <strong className="text-white">{INDUSTRY_LABELS[input.industry]}</strong></span>
-            <span>규모: <strong className="text-white">{input.companySize}명</strong></span>
-            <span>분석 업무: <strong className="text-white">{result.taskResults.length}개</strong></span>
-            <span>관련 인원: <strong className="text-white">{result.totalCurrentPeople}명</strong></span>
+          <div className="bg-white/10 rounded-lg px-4 py-3 backdrop-blur">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-blue-100">
+              {input.customerName && <span>고객사: <strong className="text-white">{input.customerName}</strong></span>}
+              <span>산업: <strong className="text-white">{INDUSTRY_LABELS[input.industry]}</strong></span>
+              <span>규모: <strong className="text-white">{input.companySize}명</strong></span>
+              <span>분석 업무: <strong className="text-white">{result.taskResults.length}개</strong></span>
+              <span>관련 인원: <strong className="text-white">{result.totalCurrentPeople}명</strong></span>
+            </div>
           </div>
         </div>
 
         <div className="p-6 md:p-8 space-y-8">
-          {/* ======= #12 Celebration Banner ======= */}
-          {result.moderateROI >= 100 && (
-            <div className="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-4 text-white flex items-center gap-3 animate-scaleIn">
-              <span className="text-3xl">🎉</span>
-              <div>
-                <p className="font-bold text-lg">놀라운 ROI입니다!</p>
-                <p className="text-sm text-emerald-100">첫 해 투자수익률 {result.moderateROI}%로, 투자 대비 {(result.moderateROI / 100).toFixed(1)}배의 가치를 창출합니다.</p>
+          {/* ======= ROI Hero — Investment vs Return (most prominent) ======= */}
+          <div className="bg-gradient-to-br from-[#F0FDF4] via-white to-[#F0F9FF] rounded-2xl border-2 border-emerald-200 p-6 md:p-8 animate-scaleIn">
+            <div className="text-center mb-6">
+              <p className="text-sm font-semibold text-gray-500 mb-2">AI 도입 투자 대비 수익</p>
+              <div className="flex items-center justify-center gap-3 md:gap-6 flex-wrap">
+                <div className="text-center">
+                  <p className="text-xs text-gray-400 mb-1">투자 비용</p>
+                  <p className="text-2xl md:text-3xl font-black text-[#1B4F72]">{result.investmentCost.toLocaleString()}<span className="text-base font-bold">만원</span></p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <circle cx="20" cy="20" r="18" fill="#10B981" opacity="0.1"/>
+                    <path d="M14 20H26M26 20L21 15M26 20L21 25" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-gray-400 mb-1">첫 해 절감액</p>
+                  <p className="text-2xl md:text-3xl font-black text-[#10B981]">{result.totalYearlySaving.toLocaleString()}<span className="text-base font-bold">만원</span></p>
+                </div>
               </div>
             </div>
-          )}
+            {/* ROI Highlight */}
+            <div className="bg-white rounded-xl p-4 md:p-5 shadow-sm border border-gray-100">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">투자수익률 (ROI)</p>
+                  <p className="text-3xl md:text-4xl font-black" style={{ color: result.moderateROI > 50 ? '#10B981' : result.moderateROI > 0 ? '#F59E0B' : '#EF4444' }}>
+                    {result.moderateROI}%
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">첫 해 기준</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">투자 회수 기간</p>
+                  <p className="text-3xl md:text-4xl font-black text-[#8B5CF6]">{result.paybackMonths}<span className="text-lg">개월</span></p>
+                  <p className="text-xs text-gray-400 mt-1">{result.paybackMonths <= 6 ? '빠른 회수' : result.paybackMonths <= 12 ? '안정적' : '장기 투자'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">투자 대비 배수</p>
+                  <p className="text-3xl md:text-4xl font-black text-[#00B4D8]">{(result.totalYearlySaving / Math.max(result.investmentCost, 1)).toFixed(1)}<span className="text-lg">배</span></p>
+                  <p className="text-xs text-gray-400 mt-1">연간 수익률</p>
+                </div>
+              </div>
+            </div>
+            {result.moderateROI >= 100 && (
+              <div className="mt-4 text-center">
+                <span className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white text-sm font-bold rounded-full">
+                  🎉 투자 대비 {(result.moderateROI / 100).toFixed(1)}배 가치 창출 — 강력 추천
+                </span>
+              </div>
+            )}
+          </div>
 
-          {/* ======= Executive Summary ======= */}
+          {/* ======= Executive Summary (secondary metrics) ======= */}
           <div>
-            <SectionTitle><Tooltip text="가장 중요한 4가지 핵심 지표입니다">핵심 요약 (Executive Summary)</Tooltip></SectionTitle>
+            <SectionTitle><Tooltip text="핵심 운영 지표입니다">운영 효율 지표</Tooltip></SectionTitle>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 stagger-children">
               <MetricCard
                 label="월간 절감 시간"
@@ -149,24 +195,24 @@ export default function ResultsView({ result, input, onReset }: Props) {
                 color="#00B4D8"
               />
               <MetricCard
-                label="연간 총 절감액"
-                value={`${result.totalYearlySaving.toLocaleString()}`}
+                label="월간 절감액"
+                value={`${result.totalMonthlySaving.toLocaleString()}`}
                 unit="만원"
-                sub={`월 ${result.totalMonthlySaving.toLocaleString()}만원`}
+                sub="직접 비용 기준"
                 color="#10B981"
               />
               <MetricCard
-                label="투자수익률 (ROI)"
-                value={`${result.moderateROI}`}
-                unit="%"
-                sub="첫 해 기준"
-                color={result.moderateROI > 50 ? '#10B981' : result.moderateROI > 0 ? '#F59E0B' : '#EF4444'}
+                label="자동화 대상 인원"
+                value={`${result.totalCurrentPeople}`}
+                unit="명"
+                sub="반복 업무 투입"
+                color="#F59E0B"
               />
               <MetricCard
-                label="투자 회수 기간"
-                value={`${result.paybackMonths}`}
-                unit="개월"
-                sub={`투자비 ${result.investmentCost.toLocaleString()}만원`}
+                label="즉시 자동화 가능"
+                value={`${result.taskResults.filter(t => t.feasibility === 'high').length}`}
+                unit="개 업무"
+                sub="Quick Win 영역"
                 color="#8B5CF6"
               />
             </div>
@@ -779,14 +825,24 @@ export default function ResultsView({ result, input, onReset }: Props) {
             </a>
           </div>
 
-          {/* ======= Footer ======= */}
-          <div className="pt-6 border-t border-gray-100 text-center space-y-1">
-            <p className="text-xs text-gray-400">
-              본 분석은 보수적 추정 기반이며 실제 성과는 고객 환경에 따라 달라질 수 있습니다.
-            </p>
-            <p className="text-xs text-gray-400">
-              Confidential — {input.customerName || '고객사'} 전용 리포트 · 위시켓 AIDP · {new Date().getFullYear()}
-            </p>
+          {/* ======= Footer — Professional Trust ======= */}
+          <div className="pt-6 border-t border-gray-100 space-y-3">
+            <div className="flex items-center justify-center gap-3 text-xs text-gray-400">
+              <svg width="16" height="16" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="6" fill="#1B4F72" opacity="0.15"/>
+                <path d="M7 20L14 8L21 20H7Z" fill="#1B4F72" opacity="0.4"/>
+                <circle cx="14" cy="12" r="3" fill="#1B4F72" opacity="0.3"/>
+              </svg>
+              <span>위시켓 AIDP · AI Delivery Platform</span>
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-xs text-gray-400">
+                본 분석은 업계 벤치마크 기반 보수적 추정이며, 실제 성과는 고객 환경에 따라 달라질 수 있습니다.
+              </p>
+              <p className="text-[11px] text-gray-300">
+                Confidential — {input.customerName || '고객사'} 전용 리포트 · © {new Date().getFullYear()} 위시켓
+              </p>
+            </div>
           </div>
         </div>
       </div>

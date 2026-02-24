@@ -81,7 +81,7 @@ export default function Home() {
   };
 
   // --- Task field update ---
-  const updateTask = (id: string, field: 'peopleCount' | 'hoursPerPersonWeek' | 'enabled', value: number | boolean) => {
+  const updateTask = (id: string, field: 'peopleCount' | 'hoursPerPersonWeek' | 'enabled' | 'label' | 'automationRate', value: number | boolean | string) => {
     setInput(prev => ({
       ...prev,
       tasks: prev.tasks.map(t => t.id === id ? { ...t, [field]: value } : t),
@@ -145,22 +145,32 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]" role="main" lang="ko">
-      {/* Header — sticky */}
-      <header className="bg-gradient-to-r from-[#1B4F72] to-[#2563EB] text-white shadow-lg sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      {/* Header — sticky, professional design */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-white/20 backdrop-blur rounded-lg flex items-center justify-center font-bold text-sm">AI</div>
+            <div className="flex items-center gap-2">
+              <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                <rect width="28" height="28" rx="6" fill="#1B4F72"/>
+                <path d="M7 20L14 8L21 20H7Z" fill="#00B4D8" opacity="0.9"/>
+                <circle cx="14" cy="12" r="3" fill="white"/>
+              </svg>
+              <div className="h-5 w-px bg-gray-300" />
+            </div>
             <div>
-              <h1 className="text-lg font-bold tracking-tight">AIDP ROI 시뮬레이터</h1>
-              <p className="text-xs text-blue-200 opacity-80">위시켓 AI Delivery Platform · v2.0</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-base font-bold text-gray-900 tracking-tight">AIDP ROI 시뮬레이터</h1>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00B4D8]/10 text-[#00B4D8] font-semibold">Beta</span>
+              </div>
+              <p className="text-[11px] text-gray-400">Powered by 위시켓</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {step < 4 && step > 1 && (
-              <span className="text-xs text-blue-200 hidden sm:block">진행률 {Math.round(((step - 1) / 3) * 100)}%</span>
+              <span className="text-xs text-gray-400 hidden sm:block">{step}/3 단계</span>
             )}
             {step === 4 && (
-              <button onClick={handleReset} className="text-sm bg-white/15 hover:bg-white/25 px-4 py-2 rounded-lg transition backdrop-blur">
+              <button onClick={handleReset} className="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition font-medium">
                 새 시뮬레이션
               </button>
             )}
@@ -168,7 +178,7 @@ export default function Home() {
         </div>
         {/* Progress bar under header */}
         {step < 4 && (
-          <div className="h-1 bg-white/10">
+          <div className="h-0.5 bg-gray-100">
             <div
               className="h-full bg-[#00B4D8] transition-all duration-500 ease-out"
               style={{ width: `${((step - 1) / 3) * 100}%` }}
@@ -208,42 +218,51 @@ export default function Home() {
         {/* ====== STEP 1: 기업 프로필 ====== */}
         {step === 1 && (
           <div className="space-y-6 animate-fadeInUp">
-            {/* #27: Landing Hero */}
-            <div className="bg-gradient-to-br from-[#1B4F72] via-[#1E5A8A] to-[#2563EB] rounded-2xl p-6 md:p-8 text-white">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-3xl">🎯</span>
-                <span className="text-xs bg-white/20 px-3 py-1 rounded-full backdrop-blur">3분 소요 · 무료 분석</span>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-black leading-tight mb-3">
-                AI 도입하면 우리 회사에서<br />
-                <span className="text-[#00B4D8]">얼마나 절약</span>할 수 있을까?
-              </h2>
-              <p className="text-sm text-blue-200 mb-4 max-w-lg">
-                업계 데이터 기반으로 귀사의 AI 자동화 ROI를 정밀 분석합니다. 숨은 비용까지 찾아내는 심층 리포트를 즉시 받아보세요.
-              </p>
-              <div className="flex flex-wrap gap-3 text-xs text-blue-200">
-                <span className="flex items-center gap-1">✅ 업계별 벤치마크 비교</span>
-                <span className="flex items-center gap-1">✅ 숨은 비용 발견</span>
-                <span className="flex items-center gap-1">✅ IT 컨설턴트 맞춤 분석</span>
-                <span className="flex items-center gap-1">✅ 3개년 ROI 시뮬레이션</span>
+            {/* Landing Hero — Professional & Trust-first */}
+            <div className="bg-[#1B4F72] rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
+              {/* Subtle pattern background */}
+              <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="text-xs bg-white/15 px-3 py-1 rounded-full backdrop-blur font-medium">무료 · 3분 소요 · 즉시 결과</span>
+                </div>
+                <h2 className="text-2xl md:text-3xl font-black leading-tight mb-3">
+                  AI 자동화 도입 시<br />
+                  <span className="text-[#00B4D8]">우리 회사의 ROI</span>는 얼마인가?
+                </h2>
+                <p className="text-sm text-blue-200 mb-5 max-w-lg leading-relaxed">
+                  산업별 벤치마크 데이터 기반으로 귀사의 AI 자동화 투자 수익률을 정밀 분석합니다.
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {[
+                    { icon: '📊', text: '업계 벤치마크 비교' },
+                    { icon: '🔍', text: '숨은 비용 발견' },
+                    { icon: '🧑‍💼', text: 'IT 컨설턴트 진단' },
+                    { icon: '📈', text: '3개년 ROI 분석' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 bg-white/10 rounded-lg px-3 py-2 backdrop-blur-sm">
+                      <span className="text-base">{item.icon}</span>
+                      <span className="text-xs font-medium text-blue-100">{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+                {/* Trust indicators */}
+                <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-4 text-xs text-blue-300">
+                  <span className="flex items-center gap-1">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L8.5 4.5L12.5 5L9.75 7.5L10.5 11.5L7 9.5L3.5 11.5L4.25 7.5L1.5 5L5.5 4.5L7 1Z" fill="#FCD34D"/></svg>
+                    위시켓 공식 분석 도구
+                  </span>
+                  <span>|</span>
+                  <span>데이터 보안 준수</span>
+                  <span>|</span>
+                  <span>개인정보 미수집</span>
+                </div>
               </div>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
               <h2 className="text-xl font-bold text-[#1B4F72] mb-1">기업 프로필</h2>
               <p className="text-sm text-gray-500 mb-6">정확한 진단을 위해 기업 정보를 선택해주세요.</p>
-
-              {/* 고객사명 */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">고객사명 <span className="text-gray-400 font-normal">(선택)</span></label>
-                <input
-                  type="text"
-                  placeholder="예: 삼성전자"
-                  value={input.customerName}
-                  onChange={e => setInput({ ...input, customerName: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-[#00B4D8] focus:ring-2 focus:ring-[#00B4D8]/20 outline-none transition text-sm"
-                />
-              </div>
 
               {/* 산업 선택 */}
               <div className="mb-6">
@@ -354,6 +373,18 @@ export default function Home() {
                     <span>🤖</span> IT 컨설턴트가 입력 내용을 기반으로 맞춤 분석을 제공합니다
                   </p>
                 )}
+              </div>
+
+              {/* 고객사명 — optional, placed at bottom to reduce lead-gen feel */}
+              <div className="mb-6 flex items-center gap-3">
+                <label className="text-sm text-gray-400 whitespace-nowrap">리포트에 표시할 고객사명</label>
+                <input
+                  type="text"
+                  placeholder="선택사항"
+                  value={input.customerName}
+                  onChange={e => setInput({ ...input, customerName: e.target.value })}
+                  className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-[#00B4D8] focus:ring-1 focus:ring-[#00B4D8]/20 outline-none transition text-sm"
+                />
               </div>
 
               {/* #29: Validation feedback */}
@@ -502,16 +533,31 @@ export default function Home() {
                         {task.enabled && <span className="text-xs">✓</span>}
                       </button>
 
-                      {/* Task name */}
+                      {/* Task name — editable */}
                       <div className="flex-1 min-w-[120px]">
-                        <p className="text-sm font-semibold text-gray-700">{task.label}</p>
+                        <input
+                          type="text"
+                          value={task.label}
+                          onChange={e => updateTask(task.id, 'label', e.target.value)}
+                          className="text-sm font-semibold text-gray-700 bg-transparent border-b border-transparent hover:border-gray-300 focus:border-[#00B4D8] outline-none w-full py-0.5 transition"
+                          title="업무명을 수정할 수 있습니다"
+                        />
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className={`text-xs px-1.5 py-0.5 rounded ${
+                          <span className={`text-xs px-1.5 py-0.5 rounded inline-flex items-center gap-1 ${
                             task.feasibility === 'high' ? 'bg-green-50 text-green-600' :
                             task.feasibility === 'medium' ? 'bg-yellow-50 text-yellow-600' :
                             'bg-gray-50 text-gray-500'
                           }`}>
-                            자동화 {Math.round(task.automationRate * 100)}%
+                            자동화
+                            <input
+                              type="number"
+                              min={10}
+                              max={95}
+                              value={Math.round(task.automationRate * 100)}
+                              onChange={e => updateTask(task.id, 'automationRate', Math.min(0.95, Math.max(0.1, Number(e.target.value) / 100)))}
+                              className="w-8 bg-transparent text-center font-semibold outline-none"
+                              title="자동화율을 조정할 수 있습니다"
+                            />%
                           </span>
                         </div>
                       </div>
